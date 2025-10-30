@@ -1,0 +1,96 @@
+pipeline {
+    agent any
+    triggers {
+  cron('0 06 * * *')
+  }
+
+    tools {
+        maven "Maven"
+        jdk "OpenJDK"
+        
+    }
+    
+    environment{
+        SCANNER_HOME= tool 'sonar-scanner'
+    }
+
+    stages {
+        stage(' Git Checkout') {
+            steps {
+                script {
+                    // Replace 'https://github.com/yourusername/yourrepository.git' with your repository URL
+                    git url: 'https://github.com/17-kajal/DevTestOps.git'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    bat "mvn clean compile -DskipTests=true"
+                }
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                script {
+                    bat "mvn test"
+                }
+            }
+        }
+
+        stage('Code Quality Analysis') {
+            steps {
+                script {
+                    // Replace 'SonarQube' with the installation name configured in Jenkins
+                    withSonarQubeEnv(installationName: 'Sonar', credentialsId: 'Token_sonar') {
+                        bat "mvn sonar:sonar"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Sample deployment steps (modify as needed)
+                echo "Deploying to production..."
+            }
+        }
+    
+    
+        stage("Publish to Artifactory"){
+            steps{
+              rtMavenDeployer(
+                  id: 'deployer',
+                  serverId:'jfrog_server',
+                  releaseRepo:'example-repo-local',
+                  snapshotRepo:'example-repo-local',
+                )
+              rtMavenRun(
+                  pom: 'pom.xml',
+                  goals:'clean install',
+                  deployerId:'deployer'
+              )
+              rtPublishBuildInfo(
+                  serverId:'jfrog_server',
+              )
+            }
+              
+      }
+    }
+
+    post {
+        
+        success {
+            // Record the test results if Maven ran the tests successfully
+            junit '**/target/surefire-reports/TEST-*.xml'
+        }
+        
+        failure {
+            // Notify or take action in case of pipeline failure
+            echo "Pipeline failed, sending notification..."
+            // You can send notifications via email, Slack, etc.
+        }
+    }
+}
