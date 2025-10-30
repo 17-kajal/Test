@@ -60,4 +60,3 @@ pipeline {
             // You can send notifications via email, Slack, etc.
         }
     }
-}
