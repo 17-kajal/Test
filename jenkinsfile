@@ -9,17 +9,13 @@ pipeline {
         jdk "JDK17"
         
     }
-    
-    environment{
-        SCANNER_HOME= tool 'sonar-scanner'
-    }
 
     stages {
         stage(' Git Checkout') {
             steps {
                 script {
                     // Replace 'https://github.com/yourusername/yourrepository.git' with your repository URL
-                    git url: 'https://github.com/17-kajal/DevTestOps.git'
+                    git url: 'https://github.com/17-kajal/Test.git'
                 }
             }
         }
@@ -40,15 +36,6 @@ pipeline {
             }
         }
 
-        stage('Code Quality Analysis') {
-            steps {
-                script {
-                    // Replace 'SonarQube' with the installation name configured in Jenkins
-                    withSonarQubeEnv(installationName: 'Sonar', credentialsId: 'Token_sonar') {
-                        bat "mvn sonar:sonar"
-                    }
-                }
-            }
         }
 
         stage('Deploy') {
@@ -58,26 +45,6 @@ pipeline {
             }
         }
     
-    
-        stage("Publish to Artifactory"){
-            steps{
-              rtMavenDeployer(
-                  id: 'deployer',
-                  serverId:'jfrog_server',
-                  releaseRepo:'example-repo-local',
-                  snapshotRepo:'example-repo-local',
-                )
-              rtMavenRun(
-                  pom: 'pom.xml',
-                  goals:'clean install',
-                  deployerId:'deployer'
-              )
-              rtPublishBuildInfo(
-                  serverId:'jfrog_server',
-              )
-            }
-              
-      }
     }
 
     post {
