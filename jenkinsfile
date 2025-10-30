@@ -1,20 +1,19 @@
 pipeline {
     agent any
+    
     triggers {
-  cron('0 06 * * *')
-  }
+        cron('0 06 * * *')
+    }
 
     tools {
         maven "Maven"
         jdk "JDK17"
-        
     }
 
     stages {
-        stage(' Git Checkout') {
+        stage('Git Checkout') {
             steps {
                 script {
-                    // Replace 'https://github.com/yourusername/yourrepository.git' with your repository URL
                     git url: 'https://github.com/17-kajal/Test.git'
                 }
             }
@@ -36,27 +35,20 @@ pipeline {
             }
         }
 
-        }
-
         stage('Deploy') {
             steps {
-                // Sample deployment steps (modify as needed)
                 echo "Deploying to production..."
             }
         }
-    
     }
 
     post {
-        
         success {
-            // Record the test results if Maven ran the tests successfully
             junit '**/target/surefire-reports/TEST-*.xml'
         }
         
         failure {
-            // Notify or take action in case of pipeline failure
             echo "Pipeline failed, sending notification..."
-            // You can send notifications via email, Slack, etc.
         }
     }
+}
