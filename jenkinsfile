@@ -6,7 +6,7 @@ pipeline {
 
     tools {
         maven "Maven"
-        jdk "OpenJDK"
+        jdk "JDK17"
         
     }
     
